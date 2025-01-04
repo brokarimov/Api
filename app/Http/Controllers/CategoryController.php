@@ -28,16 +28,12 @@ class CategoryController extends Controller
             'message' => 'success',
         ];
 
-        return response()->json($data);
+        return new CategoryResource($model);
     }
     public function show(Category $category)
     {
-        $data = [
-            'model' => $category,
-            'message' => 'success',
-        ];
+        return new CategoryResource($category);
 
-        return response()->json($data);
     }
     public function update(Category $category, Request $request)
     {
@@ -51,7 +47,7 @@ class CategoryController extends Controller
             'model' => $category,
             'message' => 'success',
         ];
-        return response()->json($data);
+        return new CategoryResource($category);
     }
     
     public function delete(Category $category)

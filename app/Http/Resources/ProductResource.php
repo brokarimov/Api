@@ -1,13 +1,11 @@
 <?php
 
 namespace App\Http\Resources;
-
-
-
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class PostResource extends JsonResource
+class ProductResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -18,11 +16,9 @@ class PostResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'title' => $this->title,
+            'name' => $this->name,
             'category' => $this->categories->name,
-            'description' => $this->description,
-            'text' => $this->text,
-            'image' => $this->image,
+            'description' => $this->description
         ];
     }
 }

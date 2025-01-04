@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\ProductResource;
 use App\Models\AttributeCharacteristic;
 use App\Models\Element;
 use App\Models\Option;
@@ -11,7 +12,12 @@ use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    public function index() {}
+    public function index()
+    {
+        $products = Product::all();
+        
+        return ProductResource::collection($products);
+    }
 
     public function store(Request $request)
     {
@@ -21,37 +27,35 @@ class ProductController extends Controller
             'description' => $request->description,
         ]);
 
-        $element = Element::create([
-            'title' => $request->title,
-            'product_id' => $product->id,
-            'price' => $request->price,
-        ]);
-        $existing_attribute_characteristic_id = AttributeCharacteristic::where('attribute_id', $request->attribute_id)->where('characteristic_id', $request->characteristic_id)->exists();
-        if (!$existing_attribute_characteristic_id) {
-            $existing_attribute_characteristic_id = AttributeCharacteristic::create([
-                'attribute_id' => $request->attribute_id,
-                'characteristic_id' => $request->characteristic_id,
-            ]);
-        } else {
-            $existing_attribute_characteristic_id = AttributeCharacteristic::where('attribute_id', $request->attribute_id)->where('characteristic_id', $request->characteristic_id)->first();
-        }
+        return new ProductResource($product);
+    }
 
-        $option = Option::create([
-            'element_id' => $element->id,
-            'attribute_characteristic_id' => $existing_attribute_characteristic_id->id,
+    public function show(Product $product)
+    {
+        return new ProductResource($product);
+
+    }
+    public function update(Product $product, Request $request)
+    {
+        $validate = $request->validate([
+            'name' => 'required|max:255',
+            'category_id' => 'required|exists:categories,id',
+            'description' => 'required'
         ]);
 
-        $option = Option::with('attributeCharacteristic.attributes', 'attributeCharacteristic.characteristic')
-            ->find($option->id);
+        $product->update($validate);
 
+        
+        return new ProductResource($product);
+    }
+    
+    public function delete(Product $product)
+    {
+        $product->delete();
         $data = [
-            'name' => $product->name,
-            'category_id' => $product->categories->name,
-            'description' => $product->description,
-            'title' => $element->title,
-            'price' => $element->price,
-            'attribute_characteristic_id' => $option->attributeCharacteristic->attributes->name. ' = ' .$option->attributeCharacteristic->characteristic->name,
+            'message' => 'success',
         ];
+
         return response()->json($data);
     }
 }
